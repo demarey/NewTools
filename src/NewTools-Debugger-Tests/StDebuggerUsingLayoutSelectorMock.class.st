@@ -1,5 +1,5 @@
 "
-I mock the state of StDebuggerUsingSpecSelector to test variations in its state.
+I mock the state of StDebuggerUsingLayoutSelector to test variations in its state.
 "
 Class {
 	#name : #StDebuggerUsingLayoutSelectorMock,
@@ -37,8 +37,8 @@ StDebuggerUsingLayoutSelectorMock >> activateDebuggerExtensions [
 ]
 
 { #category : #accessing }
-StDebuggerUsingLayoutSelectorMock >> availableSpecSelectors [
-	^ StDebugger availableSpecSelectors
+StDebuggerUsingLayoutSelectorMock >> availableLayoutSelectors [
+	^ StDebugger availableLayoutSelectors
 		add: self nonDefaultSelector;
 		yourself
 ]

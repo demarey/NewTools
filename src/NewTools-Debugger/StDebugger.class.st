@@ -93,7 +93,7 @@ Class {
 		'ActivateDebuggerExtensions',
 		'ErrorRecursion',
 		'FastTDD',
-		'UsingSpecSelector'
+		'UsingLayoutSelector'
 	],
 	#category : #'NewTools-Debugger-View'
 }
@@ -109,9 +109,9 @@ StDebugger class >> activateDebuggerExtensions: anObject [
 	ActivateDebuggerExtensions := anObject
 ]
 
-{ #category : #specs }
-StDebugger class >> availableSpecSelectors [
-	^ self class allSelectorsInProtocol: 'specs - selectors'
+{ #category : #layouts }
+StDebugger class >> availableLayoutSelectors [
+	^ self class allSelectorsInProtocol: 'layouts - selectors'
 ]
 
 { #category : #commands }
@@ -133,7 +133,7 @@ StDebugger class >> closeAllDebuggers [
 	StDebugger allInstancesDo: [ :dbg | dbg close ]
 ]
 
-{ #category : #specs }
+{ #category : #layouts }
 StDebugger class >> codeLayout [
 
 	^ SpBoxLayout newTopToBottom
@@ -162,17 +162,17 @@ StDebugger class >> debuggerContextClass [
 { #category : #settings }
 StDebugger class >> debuggerLayoutSettingsOn: aBuilder [
 	<systemsettings>
-	(aBuilder pickOne: #usingSpecSelector)
+	(aBuilder pickOne: #usingLayoutSelector)
 		label: 'Default debugger spec layout';
 		target: self;
-		default: #debuggerWithoutExtensionsSpec;
+		default: #debuggerWithoutExtensionsLayout;
 		parent: #debugging;
-		domainValues: self availableSpecSelectors;
+		domainValues: self availableLayoutSelectors;
 		description: 'Sets the default spec layout of the debugger.'
 ]
 
-{ #category : #'specs - selectors' }
-StDebugger class >> debuggerWithExtensionsSpec [
+{ #category : #'layouts - selectors' }
+StDebugger class >> debuggerWithExtensionsLayout [
 
 	^ SpPanedLayout newTopToBottom
 		positionOfSlider: 65 percent;
@@ -185,8 +185,8 @@ StDebugger class >> debuggerWithExtensionsSpec [
 		yourself
 ]
 
-{ #category : #'specs - selectors' }
-StDebugger class >> debuggerWithoutExtensionsSpec [
+{ #category : #'layouts - selectors' }
+StDebugger class >> debuggerWithoutExtensionsLayout [
 
 	^ SpPanedLayout newTopToBottom
 		positionOfSlider: 65 percent;
@@ -201,9 +201,10 @@ StDebugger class >> defaultDebuggerRank [
 	^ 10
 ]
 
-{ #category : #specs }
-StDebugger class >> defaultSpec [
-	^ self perform: self usingSpecSelector
+{ #category : #layouts }
+StDebugger class >> defaultLayout [
+
+	^ self perform: self usingLayoutSelector
 ]
 
 { #category : #'tools registry' }
@@ -273,7 +274,7 @@ StDebugger class >> spanNewSessionFrom: anotherSession [
 	^ anotherSession spanNewSession
 ]
 
-{ #category : #specs }
+{ #category : #layouts }
 StDebugger class >> stackAndCodeLayout [
 
 	^ SpPanedLayout newTopToBottom
@@ -283,7 +284,7 @@ StDebugger class >> stackAndCodeLayout [
 		yourself
 ]
 
-{ #category : #specs }
+{ #category : #layouts }
 StDebugger class >> stackLayout [
 	^ SpBoxLayout newTopToBottom
 		add: #stackHeader
@@ -307,17 +308,17 @@ StDebugger class >> usesExtensions [
 		  self hasAnyActivatedExtension: self extensionToolsClasses ]
 ]
 
-{ #category : #specs }
-StDebugger class >> usingSpecSelector [
-	^ (UsingSpecSelector
-		ifNil: [ UsingSpecSelector := StDebuggerLayoutSelector defaultSelector ])
-		selectSpecSelector
+{ #category : #layouts }
+StDebugger class >> usingLayoutSelector [
+	^ (UsingLayoutSelector
+		ifNil: [ UsingLayoutSelector := StDebuggerLayoutSelector defaultSelector ])
+		selectLayoutSelector
 ]
 
-{ #category : #specs }
-StDebugger class >> usingSpecSelector: aSelector [
+{ #category : #layouts }
+StDebugger class >> usingLayoutSelector: aSelector [
 
-	UsingSpecSelector := StDebuggerLayoutSelector on: aSelector
+	UsingLayoutSelector := StDebuggerLayoutSelector on: aSelector
 ]
 
 { #category : #'presenter - code' }
@@ -540,6 +541,11 @@ StDebugger >> debuggerInspectorClass [
 { #category : #accessing }
 StDebugger >> debuggerInspectorModelClass [
 	^ StDebuggerInspectorModel
+]
+
+{ #category : #initialization }
+StDebugger >> defaultLayout [ 
+	^ self class defaultLayout
 ]
 
 { #category : #'presenter - code' }
