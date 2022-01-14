@@ -310,14 +310,14 @@ StDebugger class >> usesExtensions [
 { #category : #specs }
 StDebugger class >> usingSpecSelector [
 	^ (UsingSpecSelector
-		ifNil: [ UsingSpecSelector := StDebuggerSpecSelector defaultSelector ])
+		ifNil: [ UsingSpecSelector := StDebuggerLayoutSelector defaultSelector ])
 		selectSpecSelector
 ]
 
 { #category : #specs }
 StDebugger class >> usingSpecSelector: aSelector [
 
-	UsingSpecSelector := StDebuggerSpecSelector on: aSelector
+	UsingSpecSelector := StDebuggerLayoutSelector on: aSelector
 ]
 
 { #category : #'presenter - code' }

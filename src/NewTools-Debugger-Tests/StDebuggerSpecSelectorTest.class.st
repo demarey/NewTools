@@ -9,13 +9,13 @@ Class {
 
 { #category : #helpers }
 StDebuggerSpecSelectorTest >> defaultSelectorWithExtensions [
-	^ StDebuggerSpecSelector
+	^ StDebuggerLayoutSelector
 		defaultDebuggerWithExtensionSpecSelector
 ]
 
 { #category : #helpers }
 StDebuggerSpecSelectorTest >> defaultSelectorWithoutExtensions [
-	^ StDebuggerSpecSelector
+	^ StDebuggerLayoutSelector
 		defaultDebuggerWithoutExtensionSpecSelector
 ]
 
@@ -23,14 +23,14 @@ StDebuggerSpecSelectorTest >> defaultSelectorWithoutExtensions [
 StDebuggerSpecSelectorTest >> setUp [
 	"Hooks that subclasses may override to define the fixture of test."
 	super setUp.
-	specSelector := StDebuggerSpecSelector new
+	specSelector := StDebuggerLayoutSelector new
 ]
 
 { #category : #'tests - spec' }
 StDebuggerSpecSelectorTest >> testCustomSelectExtensionActivationSpecFrom [
 	| customSelector mockSelector |
 	customSelector := #anySelector.
-	mockSelector := StDebuggerUsingSpecSelectorMock new.
+	mockSelector := StDebuggerUsingLayoutSelectorMock new.
 	
 	mockSelector initializeWithExtensionsNoneActivated.
 	self
@@ -56,7 +56,7 @@ StDebuggerSpecSelectorTest >> testCustomSelectExtensionActivationSpecFrom [
 { #category : #'tests - spec' }
 StDebuggerSpecSelectorTest >> testCustomSelectSpecSelector [
 	| customSelector mockSelector |
-	mockSelector := StDebuggerUsingSpecSelectorMock new.
+	mockSelector := StDebuggerUsingLayoutSelectorMock new.
 	customSelector := mockSelector nonDefaultSelector.	
 	mockSelector specSelector: customSelector.
 	
@@ -81,7 +81,7 @@ StDebuggerSpecSelectorTest >> testDebuggerClass [
 { #category : #'tests - spec' }
 StDebuggerSpecSelectorTest >> testDefaultSelector [
 	self
-		assert: StDebuggerSpecSelector defaultSelector specSelector
+		assert: StDebuggerLayoutSelector defaultSelector specSelector
 		equals: specSelector class defaultDebuggerWithExtensionSpecSelector
 ]
 
@@ -103,7 +103,7 @@ StDebuggerSpecSelectorTest >> testNilSelectSpecSelector [
 	| withExtensionSelector withoutExtensionSelector  mockSelector |
 	withExtensionSelector := self defaultSelectorWithExtensions.
 	withoutExtensionSelector := self defaultSelectorWithoutExtensions.	
-	mockSelector := StDebuggerUsingSpecSelectorMock new.
+	mockSelector := StDebuggerUsingLayoutSelectorMock new.
 	mockSelector specSelector: nil.
 	
 	mockSelector	initializeWithExtensionsNoneActivated.	
@@ -124,7 +124,7 @@ StDebuggerSpecSelectorTest >> testSelectExtensionActivationSpecFrom [
 	| withExtensionSelector withoutExtensionSelector mockSelector |
 	withExtensionSelector := self defaultSelectorWithExtensions.
 	withoutExtensionSelector := self defaultSelectorWithoutExtensions.	
-	mockSelector := StDebuggerUsingSpecSelectorMock new.
+	mockSelector := StDebuggerUsingLayoutSelectorMock new.
 		
 	mockSelector	initializeWithExtensionsNoneActivated.		
 	self
@@ -162,7 +162,7 @@ StDebuggerSpecSelectorTest >> testSelectExtensionActivationSpecFrom [
 { #category : #'tests - spec' }
 StDebuggerSpecSelectorTest >> testSelectNonDefaultSpecSelector [
 	| nonDefaultSelector mockSelector |		
-	mockSelector := StDebuggerUsingSpecSelectorMock new.	
+	mockSelector := StDebuggerUsingLayoutSelectorMock new.	
 	nonDefaultSelector := mockSelector nonDefaultSelector.
 	mockSelector specSelector: nonDefaultSelector.	
 		
@@ -193,7 +193,7 @@ StDebuggerSpecSelectorTest >> testSelectSpecSelectorWithExtensions [
 	| withExtensionSelector withoutExtensionSelector mockSelector |
 	withExtensionSelector := self defaultSelectorWithExtensions.
 	withoutExtensionSelector := self defaultSelectorWithoutExtensions.			
-	mockSelector := StDebuggerUsingSpecSelectorMock new.
+	mockSelector := StDebuggerUsingLayoutSelectorMock new.
 	mockSelector specSelector: withExtensionSelector.	
 			
 	mockSelector initializeWithExtensionsNoneActivated.
@@ -221,7 +221,7 @@ StDebuggerSpecSelectorTest >> testSelectSpecSelectorWithExtensions [
 StDebuggerSpecSelectorTest >> testSelectSpecSelectorWithoutExtensions [
 	| withoutExtensionSelector mockSelector |
 	withoutExtensionSelector := self defaultSelectorWithoutExtensions.			
-	mockSelector := StDebuggerUsingSpecSelectorMock new.
+	mockSelector := StDebuggerUsingLayoutSelectorMock new.
 	mockSelector specSelector: withoutExtensionSelector.	
 		
 	mockSelector initializeWithExtensionsNoneActivated.		

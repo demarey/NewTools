@@ -2,8 +2,8 @@
 I mock the state of StDebuggerUsingSpecSelector to test variations in its state.
 "
 Class {
-	#name : #StDebuggerUsingSpecSelectorMock,
-	#superclass : #StDebuggerSpecSelector,
+	#name : #StDebuggerUsingLayoutSelectorMock,
+	#superclass : #StDebuggerLayoutSelector,
 	#instVars : [
 		'withDebuggerExtensions',
 		'withActivatedExtensions'
@@ -12,81 +12,81 @@ Class {
 }
 
 { #category : #initialization }
-StDebuggerUsingSpecSelectorMock class >> initializeWithExtensionsAllActivated [
+StDebuggerUsingLayoutSelectorMock class >> initializeWithExtensionsAllActivated [
 	^self new initializeWithExtensionsAllActivated
 ]
 
 { #category : #initialization }
-StDebuggerUsingSpecSelectorMock class >> initializeWithExtensionsNoneActivated [
+StDebuggerUsingLayoutSelectorMock class >> initializeWithExtensionsNoneActivated [
 	^self new initializeWithExtensionsNoneActivated
 ]
 
 { #category : #initialization }
-StDebuggerUsingSpecSelectorMock class >> initializeWithoutExtensionsAllActivated [
+StDebuggerUsingLayoutSelectorMock class >> initializeWithoutExtensionsAllActivated [
 	^self new initializeWithoutExtensionsAllActivated
 ]
 
 { #category : #initialization }
-StDebuggerUsingSpecSelectorMock class >> initializeWithoutExtensionsNoneActivated [
+StDebuggerUsingLayoutSelectorMock class >> initializeWithoutExtensionsNoneActivated [
 	^self new initializeWithoutExtensionsNoneActivated
 ]
 
 { #category : #accessing }
-StDebuggerUsingSpecSelectorMock >> activateDebuggerExtensions [
+StDebuggerUsingLayoutSelectorMock >> activateDebuggerExtensions [
 	^withDebuggerExtensions 
 ]
 
 { #category : #accessing }
-StDebuggerUsingSpecSelectorMock >> availableSpecSelectors [
+StDebuggerUsingLayoutSelectorMock >> availableSpecSelectors [
 	^ StDebugger availableSpecSelectors
 		add: self nonDefaultSelector;
 		yourself
 ]
 
 { #category : #specs }
-StDebuggerUsingSpecSelectorMock >> columnInspectorsSpec [
+StDebuggerUsingLayoutSelectorMock >> columnInspectorsSpec [
 ]
 
 { #category : #accessing }
-StDebuggerUsingSpecSelectorMock >> debuggerClass [ 	
+StDebuggerUsingLayoutSelectorMock >> debuggerClass [ 	
 	^self
 ]
 
 { #category : #accessing }
-StDebuggerUsingSpecSelectorMock >> extensionToolsClasses [
+StDebuggerUsingLayoutSelectorMock >> extensionToolsClasses [
 	^{}
 ]
 
 { #category : #accessing }
-StDebuggerUsingSpecSelectorMock >> hasAnyActivatedExtension: anObject [
+StDebuggerUsingLayoutSelectorMock >> hasAnyActivatedExtension: anObject [
 	^ withActivatedExtensions
 ]
 
 { #category : #initialization }
-StDebuggerUsingSpecSelectorMock >> initializeWithExtensionsAllActivated [
+StDebuggerUsingLayoutSelectorMock >> initializeWithExtensionsAllActivated [
 	withDebuggerExtensions := true.
 	withActivatedExtensions := true
 ]
 
 { #category : #initialization }
-StDebuggerUsingSpecSelectorMock >> initializeWithExtensionsNoneActivated [
+StDebuggerUsingLayoutSelectorMock >> initializeWithExtensionsNoneActivated [
 	withDebuggerExtensions := true.
 	withActivatedExtensions := false
 ]
 
 { #category : #initialization }
-StDebuggerUsingSpecSelectorMock >> initializeWithoutExtensionsAllActivated [
+StDebuggerUsingLayoutSelectorMock >> initializeWithoutExtensionsAllActivated [
 	withDebuggerExtensions := false.
 	withActivatedExtensions := true
 ]
 
 { #category : #initialization }
-StDebuggerUsingSpecSelectorMock >> initializeWithoutExtensionsNoneActivated [
+StDebuggerUsingLayoutSelectorMock >> initializeWithoutExtensionsNoneActivated [
 	withDebuggerExtensions := false.
 	withActivatedExtensions := false
 ]
 
 { #category : #accessing }
-StDebuggerUsingSpecSelectorMock >> nonDefaultSelector [
+StDebuggerUsingLayoutSelectorMock >> nonDefaultSelector [
 	^#nonDefaultSelector
 ]
