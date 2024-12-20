@@ -138,12 +138,12 @@ The ''All classes'' button is used to reset the classes selection.'
 StFinderPresenter class >> menuFinderCommandOn: aBuilder [
 	<worldMenu>
 
-	(aBuilder item: #NewFinder)
+	(aBuilder item: #Finder)
 		parent: #Searching ;
 		action: [ StFinderPresenter open ];
-		label: 'New Finder';
+		label: 'Finder';
 		order: 2; 
-		help: 'Open the new Finder tool.';
+		help: 'Open the Finder tool.';
 		iconName: #smallFind.
 
 ]
