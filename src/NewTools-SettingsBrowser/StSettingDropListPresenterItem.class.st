@@ -9,29 +9,22 @@ Class {
 { #category : 'initialization' }
 StSettingDropListPresenterItem >> initializePresenters [ 
 
+	| indexOfCurrentValue |
 	setterPresenter := self newDropList
 		items: self model domainValues;
-		display: [ : item | item asString ];
-		selectIndex: self model index;
+		display: [ :item | item name ];
 		whenSelectedItemChangedDo: [ :item | self updateSetting: item ];
-		yourself.
-	super initializePresenters.
+		yourself.	
+	indexOfCurrentValue := self model domainValues detectIndex: [ :each | each value = self model realValue ].
+	setterPresenter selectIndex: indexOfCurrentValue.
+	super initializePresenters
 ]
 
 { #category : 'initialization' }
-StSettingDropListPresenterItem >> updateSetting: aSettingDeclaration [ 
+StSettingDropListPresenterItem >> updateSetting: aSettingItem [
 	"Private - Callback for updating aSettingDeclaration with the new receiver's selected item"
 
-	self model targetSelector
-	 ifNil: [ 
-		self model target 
-			perform: self model setSelector
-			with: aSettingDeclaration default ] 
-	ifNotNil: [
-		(self model target perform: self model targetSelector) 
-			perform: self model setSelector
-			with: aSettingDeclaration default ]
-
+	aSettingItem beCurrentValue
 ]
 
 { #category : 'accessing' }

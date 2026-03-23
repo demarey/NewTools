@@ -230,12 +230,12 @@ StSettingsBrowser >> select: aString [
 ]
 
 { #category : 'execution' }
-StSettingsBrowser >> selectDialog: fileReferneces [
+StSettingsBrowser >> selectDialog: fileReferences [
 
 	^ SpSelectDialog new
 		  title: 'Settings Browser Selector';
 		  message: 'Select a Stored Settings File';
-		  items: fileReferneces;
+		  items: fileReferences;
 		  display: [ :each | each basename ];
 		  displayIcon: [ :each | self iconNamed: each systemIconName ];
 		  openModal

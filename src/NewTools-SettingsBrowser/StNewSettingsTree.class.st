@@ -1,61 +1,59 @@
 Class {
-	#name : 'StSettingsTree',
+	#name : 'StNewSettingsTree',
 	#superclass : 'SettingTree',
+	#instVars : [
+		'manager'
+	],
 	#category : 'NewTools-SettingsBrowser-Model',
 	#package : 'NewTools-SettingsBrowser',
 	#tag : 'Model'
 }
 
 { #category : 'opening' }
-StSettingsTree class >> settingsKeywords [
+StNewSettingsTree class >> settingsKeywords [
 
 	^ (Pragma allNamed: #systemsettings) collect: [: p | p method selector ]
 ]
 
+{ #category : 'checking' }
+StNewSettingsTree >> checkForUnknownTarget [
+	"check only root because other nodes with unknown target inherits it from its parent"
+
+	self treeRoots do: [ :node |
+		node item target ifNil: [ node item target: (node pragma ifNotNil: [ :prg | prg methodClass instanceSide ]) ] ].
+	self treeRoots do: [ :node | node checkForUnknownTarget ]
+]
+
 { #category : 'accessing' }
-StSettingsTree >> defaultCategories [
+StNewSettingsTree >> defaultCategories [
 	"Answer a <Collection> of <StSettingNode> representing the default main setting categories in the system"
 
-	^ self treeRoots.
+	^ self treeRoots
 ]
 
 { #category : 'testing' }
-StSettingsTree >> hasSettingsFile [ 
-	"Answer <true> if a system settings file exists"
+StNewSettingsTree >> hasSettingsFile [ 
 
-	^ self persistence hasSettingsFile 
+	^ manager isNotNil
+		and: [ manager settingsFile isNotNil
+		and: [ manager settingsFile exists ] ]
 ]
 
 { #category : 'instance creation' }
-StSettingsTree >> newSettingTreeBuilderNodes [
+StNewSettingsTree >> newSettingTreeBuilderNodes [
 	"Walk over the receiver's pragmas. Build and answer a <Collection> of <StSettingNode>, each one representing a specific setting"
-	| manager |
 
 	manager := SettingsManager forPragmaNamed: #systemsettings.
 
-	nodeList := manager settings.
-	nodeList do: [: n | n model: self ].
-	self checkForUnknownParent.
-	self checkForUnknownTarget.
-	^ nodeList 
-]
-
-{ #category : 'legacy' }
-StSettingsTree >> newSettingTreeBuilderNodesLegacy [
-	"Walk over the receiver's pragmas. Build and answer a <Collection> of <StSettingNode>, each one representing a specific setting"
-	| builder |
-
-	builder := StSettingTreeBuilder new.
-	self pragmasDo: [ :p | builder buildPragma: p ].
-	nodeList := builder nodeList.
-	nodeList do: [: n | n model: self ].
-	self checkForUnknownParent.
-	self checkForUnknownTarget.
+	nodeList := manager settings collect: [ :setting | setting asSettingNode ].
+	nodeList do: [: node | node tree: self ].
+	"self checkForUnknownParent."
+	"self checkForUnknownTarget."
 	^ nodeList 
 ]
 
 { #category : 'instance creation' }
-StSettingsTree >> newTreeHolder [
+StNewSettingsTree >> newTreeHolder [
 	"Set the receiver's collector to gather the system setting pragmas"
 
 	^ self
@@ -65,19 +63,25 @@ StSettingsTree >> newTreeHolder [
 ]
 
 { #category : 'accessing' }
-StSettingsTree >> nodeList [
+StNewSettingsTree >> nodeForSetting: aSetting [
+
+	^ nodeList detect: [ :node | node setting == aSetting ]
+]
+
+{ #category : 'accessing' }
+StNewSettingsTree >> nodeList [
 
 	^ nodeList ifNil: [ nodeList := self newSettingTreeBuilderNodes ]
 ]
 
 { #category : 'accessing' }
-StSettingsTree >> nodeList: aCollection [ 
+StNewSettingsTree >> nodeList: aCollection [ 
 
 	nodeList := aCollection
 ]
 
 { #category : 'private - queries' }
-StSettingsTree >> processSearch: aString [
+StNewSettingsTree >> processSearch: aString [
 	"Recursively collect the nodes matching aString in the receiver"
 
 	^ self treeRoots 
@@ -86,32 +90,32 @@ StSettingsTree >> processSearch: aString [
 ]
 
 { #category : 'accessing' }
-StSettingsTree >> settingsFileDirectory [
+StNewSettingsTree >> settingsFileDirectory [
 
 	^ self persistence fileReference parent
 ]
 
 { #category : 'testing' }
-StSettingsTree >> settingsFileReference [
+StNewSettingsTree >> settingsFileReference [
 	"Answer a <String> with the name of the file where settings are stored"
 
 	^ self persistence fileReference 
 ]
 
 { #category : 'instance creation' }
-StSettingsTree >> settingsKeywords [
+StNewSettingsTree >> settingsKeywords [
 
 	^ self class settingsKeywords
 ]
 
 { #category : 'accessing' }
-StSettingsTree >> sortBlock [
+StNewSettingsTree >> sortBlock [
 	^ [:a :b | self itemSortBlock value: a declaration value: b declaration ]
 ]
 
 { #category : 'instance creation' }
-StSettingsTree >> treeRoots [
+StNewSettingsTree >> treeRoots [
 	"Answer a <Collection> of <StSettingNodePresenter> representing the main setting categories in the system"
 
-	^ self newTreeHolder settingTreeRoots
+	^ self nodeList reject: #hasGroup
 ]
