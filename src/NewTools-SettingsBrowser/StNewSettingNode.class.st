@@ -41,15 +41,9 @@ StNewSettingNode >> hasChildren [
 ]
 
 { #category : 'testing' }
-StNewSettingNode >> hasGroup [ 
+StNewSettingNode >> hasParent [ 
 
-	^ setting hasGroup
-]
-
-{ #category : 'testing' }
-StNewSettingNode >> hasParent [
-	
-	^ setting hasGroup
+	^ setting hasParent
 ]
 
 { #category : 'accessing' }
@@ -92,13 +86,13 @@ StNewSettingNode >> order: anInteger [
 { #category : 'accessing' }
 StNewSettingNode >> parentName [
 	
-	^ setting group ifNotNil: [ :group | group name ]
+	^ setting parent ifNotNil: [ :group | group name ]
 ]
 
 { #category : 'accessing' }
 StNewSettingNode >> parentNode [
 	
-	^ self nodeForGroup: setting group
+	^ self nodeForGroup: setting parent
 ]
 
 { #category : 'accessing' }

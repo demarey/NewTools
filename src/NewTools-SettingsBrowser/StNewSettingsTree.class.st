@@ -117,5 +117,5 @@ StNewSettingsTree >> sortBlock [
 StNewSettingsTree >> treeRoots [
 	"Answer a <Collection> of <StSettingNodePresenter> representing the main setting categories in the system"
 
-	^ self nodeList reject: #hasGroup
+	^ self nodeList reject: #hasParent
 ]
