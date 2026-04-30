@@ -8,3 +8,15 @@ Setting >> asSettingPresenterWithOwner: aPresenter [
 		  ifPreconditionTrue: [ self realValue asSettingPresenter: self owner: aPresenter ]
 		  ifFalse: [ SpNullPresenter owner: aPresenter ]
 ]
+
+{ #category : '*NewTools-SettingsBrowser' }
+Setting >> getColorFor: aPresenter [
+	| colorPickerPresenter |
+
+	colorPickerPresenter := aPresenter instantiate: SpColorPickerPresenter on: self.
+	colorPickerPresenter
+		whenColorChangedDo: [ :color |1 halt.
+				self realValue: color value.
+				aPresenter updateColor: color value ];
+		open
+]
