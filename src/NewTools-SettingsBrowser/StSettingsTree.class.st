@@ -33,10 +33,10 @@ StSettingsTree >> newSettingTreeBuilderNodes [
 
 	manager := SettingsManager forPragmaNamed: #systemsettings.
 
-	nodeList := manager settings.
-	nodeList do: [: n | n model: self ].
-	self checkForUnknownParent.
-	self checkForUnknownTarget.
+	nodeList := manager settings collect: [ :setting | setting asSettingNode ].
+	nodeList do: [: node | node tree: self ].
+	"self checkForUnknownParent."
+	"self checkForUnknownTarget."
 	^ nodeList 
 ]
 
@@ -106,7 +106,7 @@ StSettingsTree >> settingsKeywords [
 
 { #category : 'accessing' }
 StSettingsTree >> sortBlock [
-	^ [:a :b | self itemSortBlock value: a declaration value: b declaration ]
+	^ [:a :b | self itemSortBlock value: a setting value: b setting ]
 ]
 
 { #category : 'instance creation' }
