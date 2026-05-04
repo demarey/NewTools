@@ -15,7 +15,7 @@ Setting >> getColorFor: aPresenter [
 
 	colorPickerPresenter := aPresenter instantiate: SpColorPickerPresenter on: self.
 	colorPickerPresenter
-		whenColorChangedDo: [ :color |1 halt.
+		whenColorChangedDo: [ :color |
 				self realValue: color value.
 				aPresenter updateColor: color value ];
 		open
