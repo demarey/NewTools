@@ -23,7 +23,8 @@ Class {
 		'listPresenter',
 		'scopes',
 		'allMessages',
-		'visitedScopes'
+		'visitedScopes',
+		'navigationBlock'
 	],
 	#category : 'NewTools-MethodBrowsers-Base',
 	#package : 'NewTools-MethodBrowsers',
@@ -57,23 +58,23 @@ StMethodListPresenter >> browserEnvironment [
 
 { #category : 'testing' }
 StMethodListPresenter >> buildHierarchyForMessages: messages [
+
 	| result classes |
-	self topologicSort ifFalse: [ 
-		result := IdentityDictionary new.
-		messages do: [:m | result at: m put: {} ].
-		^ result ].
-	
-	result := Dictionary new.	
+	self topologicSort ifFalse: [
+			result := OrderedIdentityDictionary new.
+			messages do: [ :m | result at: m put: {  } ].
+			^ result ].
+
+	result := OrderedDictionary new.
 	classes := (messages collect: [ :each | each methodClass ]) asSet.
-	messages do: [:message || level class |
-		class := message methodClass.
-		level := OrderedCollection new.
-		class allSuperclassesDo: [:superClass |
-			(classes includes: superClass)
-				ifTrue: [ level addFirst: superClass ]].
-		level addLast: class.
-		level addLast: message selector.
-		result at: message put: level ].
+	messages do: [ :message |
+			| level class |
+			class := message methodClass.
+			level := OrderedCollection new.
+			class allSuperclassesDo: [ :superClass | (classes includes: superClass) ifTrue: [ level addFirst: superClass ] ].
+			level addLast: class.
+			level addLast: message selector.
+			result at: message put: level ].
 	^ result
 ]
 
@@ -163,8 +164,13 @@ StMethodListPresenter >> defaultScopes [
 
 { #category : 'private - actions' }
 StMethodListPresenter >> doBrowseImplementors [
-		
-	StMethodBrowser browseImplementorsOf: self selectedMethod selector
+
+	| selectors |
+	selectors := self selectedMethods collect: [ :method | method selector ].
+
+	navigationBlock
+		ifNotNil: [ navigationBlock value: #implementorsAll value: selectors ]
+		ifNil: [ StMethodBrowser browseImplementorsOfAll: selectors ]
 ]
 
 { #category : 'private - actions' }
@@ -176,13 +182,23 @@ StMethodListPresenter >> doBrowseMethod [
 { #category : 'private - actions' }
 StMethodListPresenter >> doBrowseSenders [
 
-	StMethodBrowser browseSendersOf: self selectedMethod selector
+	| selectors |
+	selectors := self selectedMethods collect: [ :method | method selector ].
+
+	navigationBlock
+		ifNotNil: [ navigationBlock value: #sendersAll value: selectors ]
+		ifNil: [ StMethodBrowser browseSendersOfAll: selectors ]
 ]
 
 { #category : 'private - actions' }
 StMethodListPresenter >> doBrowseUsers [
-		
-	self systemNavigation browseAllUsersOfClassOrTrait: self selectedMethod methodClass
+
+	| class |
+	class := self selectedMethod methodClass.
+
+	navigationBlock
+		ifNotNil: [ navigationBlock value: #references value: class ]
+		ifNil: [ StMethodBrowser browseReferencesToClass: class ]
 ]
 
 { #category : 'private - actions' }
@@ -198,12 +214,47 @@ StMethodListPresenter >> doInspectMethod [
 ]
 
 { #category : 'private - actions' }
-StMethodListPresenter >> doRemoveMethod [
+StMethodListPresenter >> doRunTests [
 
-	self selectedMethod ifNotNil: [ :aMethod |
-		SystemNavigation new 
-			removeMethod: aMethod 
-			inClass: aMethod methodClass ]
+	| testMethods |
+	testMethods := self methods select: [ :each | each isTestMethod ].
+
+	testMethods ifEmpty: [
+			self application inform: 'No test found in the list.'.
+			^ self ].
+	testMethods do: [ :m | self executeTestFor: m debug: false ]
+]
+
+{ #category : 'execution' }
+StMethodListPresenter >> executeTestFor: aMethod debug: shouldDebug [
+
+	| selector testClasses suite result |
+	aMethod ifNil: [ ^ self ].
+
+	selector := aMethod selector.
+
+	testClasses := aMethod methodClass isAbstract
+		               ifTrue: [ aMethod methodClass allSubclasses ]
+		               ifFalse: [ { aMethod methodClass } ].
+
+	suite := TestSuite named: selector.
+
+	testClasses do: [ :each | suite addTest: (each selector: selector) ].
+
+	result := shouldDebug
+		          ifTrue: [ suite debug ]
+		          ifFalse: [ suite run ].
+	result updateResultsInHistory.
+
+	self application inform: result printString.
+
+	listPresenter updateItemsKeepingSelection: listPresenter items
+]
+
+{ #category : 'initialization' }
+StMethodListPresenter >> handleTestResultChanged: anAnnouncement [
+
+	self defer: [ listPresenter updateItemsKeepingSelection: listPresenter items ]
 ]
 
 { #category : 'initialization' }
@@ -212,23 +263,37 @@ StMethodListPresenter >> initialize [
 	super initialize.
 	topologySort := true.
 	allMessages := Set empty.
+	self registerToTestAnnouncements
 ]
 
 { #category : 'initialization' }
 StMethodListPresenter >> initializePresenters [
 
-	listPresenter := self newTable.
+	listPresenter := self newEasyColumnView.
+	listPresenter beMultipleSelection.
 	listPresenter
-		sortingBlock: [ :a :b | self sortClassesInCachedHierarchy: a b: b ];
-		addColumn: (SpStringTableColumn 
-			title: 'Location' 
-			evaluated: [ :item | self locationOf: item ]);
-		addColumn: (SpStringTableColumn 
-			title: 'Selector' 
-			evaluated: [ :item | self selectorOf: item ]);
-		addColumn: (SpStringTableColumn 
-			title: 'Package' 
-			evaluated: [ :item | self packageNameOf: item ]);
+		addColumn: (SpColumnViewColumn new
+				 title: 'Location';
+				 sortFunction: [ :item | self locationOf: item ] ascending;
+				 bind: [ :p :item | p label: (self locationOf: item) ];
+				 yourself);
+		addColumn: (StTestIconColumnView new
+				 executeBlock: [ :method | self executeTestFor: method debug: true ];
+				 cellPresenterClass: StTestIconCellPresenter;
+				 width: 20;
+				 yourself);
+		addColumn: (SpColumnViewColumn new
+				 title: 'Selector';
+				 sortFunction: #selector ascending;
+				 bind: [ :labelPresenter :item |
+						 labelPresenter label: (self selectorOf: item).
+						 labelPresenter displayStrikethrough: [ item isDeprecated ] ];
+				 yourself);
+		addColumn: (SpColumnViewColumn new
+				 title: 'Package';
+				 sortFunction: [ :item | self packageNameOf: item ] ascending;
+				 bind: [ :p :item | p label: (self packageNameOf: item) ];
+				 yourself);
 		beResizable.
 
 	listPresenter outputActivationPort transmitDo: [ :aMethod | self doBrowseMethod ].
@@ -261,26 +326,27 @@ StMethodListPresenter >> methodClassNameForItem: anItem [
 
 { #category : 'private' }
 StMethodListPresenter >> methodListActions [
-	
+
 	^ CmCommandGroup forSpec
-		beRoot;
-		register: ((CmCommandGroup forSpecNamed: 'View')
-			beDisplayedAsGroup;
-			register: (StMethodBrowseFullCommand forSpecContext: self);
-			register: (StInspectMethodCommand forSpecContext: self);
-			yourself);
-		register: ((CmCommandGroup forSpecNamed: 'Navigation')
-			beDisplayedAsGroup;
-			register: (StMessageSendersCommand forSpecContext: self);
-			register: (StImplementorsCommand forSpecContext: self);
-			register: (StClassReferencesCommand forSpecContext: self);
-			register: (StMethodVersionsCommand forSpecContext: self);
-			yourself);
-		register: ((CmCommandGroup forSpecNamed: 'CRITICAL')
-			beDisplayedAsGroup;
-			register: (StRemoveMethodCommand forSpecContext: self);
-			yourself);
-		yourself
+		  beRoot;
+		  register: ((CmCommandGroup forSpecNamed: 'View')
+				   beDisplayedAsGroup;
+				   register: (StMethodBrowseFullCommand forSpecContext: self);
+				   register: (StInspectMethodCommand forSpecContext: self);
+				   register: (StRunMethodTestCommand forSpecContext: self);
+				   yourself);
+		  register: ((CmCommandGroup forSpecNamed: 'Navigation')
+				   beDisplayedAsGroup;
+				   register: (StMessageSendersCommand forSpecContext: self);
+				   register: (StImplementorsCommand forSpecContext: self);
+				   register: (StClassReferencesCommand forSpecContext: self);
+				   register: (StMethodVersionsCommand forSpecContext: self);
+				   yourself);
+		  register: ((CmCommandGroup forSpecNamed: 'CRITICAL')
+				   beDisplayedAsGroup;
+				   register: (StRemoveMethodsCommand forSpecContext: self);
+				   yourself);
+		  yourself
 ]
 
 { #category : 'accessing' }
@@ -295,8 +361,14 @@ StMethodListPresenter >> methods: aCollection [
 	self cacheHierarchyForClasses: aCollection.
 	listPresenter items: cachedHierarchy keys asOrderedCollection.
 	allMessages := listPresenter items.
-	listPresenter listSize > 0 ifTrue: [ 
-		listPresenter selectIndex: 1 ]
+
+	listPresenter listSize > 0 ifTrue: [ self defer: [ self selectIndex: 1 ] ]
+]
+
+{ #category : 'accessing' }
+StMethodListPresenter >> navigationBlock: aBlock [
+
+	navigationBlock := aBlock
 ]
 
 { #category : 'accessing' }
@@ -366,6 +438,12 @@ StMethodListPresenter >> protocolNameForItem: anItem [
 	^ anItem protocolName ifNil: [ '' ]
 ]
 
+{ #category : 'initialization' }
+StMethodListPresenter >> registerToTestAnnouncements [
+
+	TestCase historyAnnouncer weak when: TestSuiteEnded send: #handleTestResultChanged: to: self
+]
+
 { #category : 'private - scopes' }
 StMethodListPresenter >> scopes [
 	"Answer a <Collection> of the receiver's message list scopes"
@@ -390,6 +468,12 @@ StMethodListPresenter >> selectedIndex [
 StMethodListPresenter >> selectedMethod [
 
 	^ listPresenter selection selectedItem
+]
+
+{ #category : 'api - accessing' }
+StMethodListPresenter >> selectedMethods [
+
+	^ listPresenter selection selectedItems
 ]
 
 { #category : 'accessing' }
@@ -431,7 +515,7 @@ StMethodListPresenter >> sortingBlock: aBlock [
 StMethodListPresenter >> switchScopeTo: aRBBrowserEnvironment [ 
 	"Private - Callback to scope selection from the user"
 
-	listPresenter items: (aRBBrowserEnvironment selectMessagesFrom: allMessages)
+	listPresenter items: (aRBBrowserEnvironment selectMessagesFrom: allMessages) asArray
 
 ]
 
@@ -447,13 +531,20 @@ StMethodListPresenter >> topologicSort: anObject [
 	topologySort := anObject
 ]
 
+{ #category : 'api - selection' }
+StMethodListPresenter >> unselectAll [
+
+	listPresenter selection unselectAll
+]
+
 { #category : 'private - scopes' }
 StMethodListPresenter >> updateVisitedScopesFrom: aCompiledMethod [
 	"Private - Update the list of the visited scopes"
 
-	visitedScopes 
-		ifNotNil: [ 
-			visitedScopes 
+	aCompiledMethod ifNil: [ ^ self ].
+	visitedScopes ifNotNil: [
+		visitedScopes := Set new.
+			visitedScopes
 				add: (self packageOf: aCompiledMethod);
 				add: (self classOf: aCompiledMethod);
 				add: (self classHierarchyOf: aCompiledMethod) ]

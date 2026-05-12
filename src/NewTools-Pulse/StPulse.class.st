@@ -833,9 +833,8 @@ StPulse >> mutex [
 { #category : 'private - actions' }
 StPulse >> openSettingsBrowser [
 
-	SettingBrowser new
-		rootNodes:
-		(SettingBrowser currentTree nodeNamed: #pulse) allChildren;
+	(StSettingsBrowser newApplication: self application)
+		selectPath: #(tools pulse);
 		open
 ]
 
@@ -1024,8 +1023,15 @@ StPulse >> updateResultListWith: aCollection [
 
 { #category : 'private - updating' }
 StPulse >> updateSearchFromProcessor: aProcessor [
+	| searchText |
+	
+	searchText := (String streamContents:  [ :stream |
+		stream << aProcessor query textInSearchBar. 
+		searchPresenter text trimBoth ifNotEmpty: [ :aString | 
+			stream space.
+			stream << (' ' join: (aString substrings reject: [ :each | each trimLeft first = $# ])) ] ]).
 
-	searchPresenter text: aProcessor query textInSearchBar.
+	searchPresenter text: searchText.
 	searchPresenter cursorPositionIndex: searchPresenter text size + 1.
 	paginator selectPage: (paginator pages indexOf: environmentContext)
 ]

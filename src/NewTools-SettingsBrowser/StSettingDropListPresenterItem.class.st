@@ -20,6 +20,12 @@ StSettingDropListPresenterItem >> initializePresenters [
 	super initializePresenters
 ]
 
+{ #category : 'accessing' }
+StSettingDropListPresenterItem >> settingStyle [
+
+	^ 'itemDropList'
+]
+
 { #category : 'initialization' }
 StSettingDropListPresenterItem >> updateSetting: aSettingItem [
 	"Private - Callback for updating aSettingDeclaration with the new receiver's selected item"

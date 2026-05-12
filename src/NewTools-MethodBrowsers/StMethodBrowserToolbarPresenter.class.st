@@ -13,14 +13,15 @@ Class {
 { #category : 'initialization' }
 StMethodBrowserToolbarPresenter >> connectPresenters [
 
-	scopeList whenSelectedItemChangedDo: [ : scopeEnvironment | 
+	scopeList whenSelectedItemChangedDo: [ :scopeEnvironment |
 		scopeEnvironment ifNotNil: [ messageList switchScopeTo: scopeEnvironment ] ].
-	
-	messageList whenSelectedDo: [ : item |
-		item ifNotNil: [
-			messageList updateVisitedScopesFrom: item.
-			scopeList disableSelectionDuring: [ scopeList items: messageList allScopes ] ] ]
 
+	messageList whenSelectedDo: [ :item |
+			item ifNotNil: [
+					messageList updateVisitedScopesFrom: item.
+					scopeList disableSelectionDuring: [ scopeList items: messageList allScopes ] ] ].
+	scopeList items: messageList allScopes.
+	
 ]
 
 { #category : 'layout' }
@@ -54,16 +55,18 @@ StMethodBrowserToolbarPresenter >> doFlipLayout [
 StMethodBrowserToolbarPresenter >> initializePresenters [
 
 	super initializePresenters.
-	
-	scopeList := self newDropList
-		addStyle: 'stMessageBrowserScopeList';
-		display: [ : item | item description ];
-		yourself.
-	
-	toolbarPresenter add: (self newToolbarButton
-		label: 'Flip';
-		action: [ self doFlipLayout ]).
 
+	scopeList := self newDropList
+		             addStyle: 'stMessageBrowserScopeList';
+		             display: [ :item |
+				             (item respondsTo: #description)
+					             ifTrue: [ item description ]
+					             ifFalse: [ item printString ] ];
+		             yourself.
+
+	toolbarPresenter add: (self newToolbarButton
+			 label: 'Flip';
+			 action: [ self doFlipLayout ])
 ]
 
 { #category : 'accessing' }
