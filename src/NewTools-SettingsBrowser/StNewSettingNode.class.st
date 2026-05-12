@@ -3,7 +3,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'setting',
-		'tree'
+		'tree',
+		'matchBlock'
 	],
 	#category : 'NewTools-SettingsBrowser-Model',
 	#package : 'NewTools-SettingsBrowser',
@@ -30,7 +31,6 @@ StNewSettingNode >> allChildren [
 
 { #category : 'converting' }
 StNewSettingNode >> asPresenterOn: aPresenter [ 
-
 	^ setting asSettingPresenterWithOwner: aPresenter 
 ]
 
@@ -59,6 +59,32 @@ StNewSettingNode >> level [
 ]
 
 { #category : 'accessing' }
+StNewSettingNode >> matchBlock [
+
+	^ matchBlock
+		ifNil: [ 
+			matchBlock := [ : node : pattern | 
+				node label substrings anySatisfy: [ : substr |
+					substr asLowercase beginsWith: pattern asLowercase ] ] ]
+]
+
+{ #category : 'testing' }
+StNewSettingNode >> matches: aString [
+	"Recursive search the receiver for aString in its label"
+
+	| result |
+	result := OrderedCollection new.
+	self allChildren do: [ :node |
+		(self matchBlock value: node value: aString) ifTrue: [ 
+			result add: node ].
+
+		node hasChildren ifTrue: [
+			result addAll: (node matches: aString) ] ].
+
+	^ result
+]
+
+{ #category : 'accessing' }
 StNewSettingNode >> name [
 	
 	^ setting name
@@ -78,8 +104,6 @@ StNewSettingNode >> order [
 { #category : 'accessing' }
 StNewSettingNode >> order: anInteger [ 
 
-	self flag: 'should be setting order or node order?'.
-	
 	setting order: anInteger.
 ]
 

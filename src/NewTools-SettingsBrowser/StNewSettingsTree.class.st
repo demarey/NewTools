@@ -41,14 +41,13 @@ StNewSettingsTree >> hasSettingsFile [
 
 { #category : 'instance creation' }
 StNewSettingsTree >> newSettingTreeBuilderNodes [
-	"Walk over the receiver's pragmas. Build and answer a <Collection> of <StSettingNode>, each one representing a specific setting"
+	"Walk over the receiver's pragmas. Build and answer an <Array> of <StSettingNode>, each one representing a specific setting"
 
 	manager := SettingsManager forPragmaNamed: #systemsettings.
+	manager useDefaultPreferencesFile.
 
 	nodeList := manager settings collect: [ :setting | setting asSettingNode ].
 	nodeList do: [: node | node tree: self ].
-	"self checkForUnknownParent."
-	"self checkForUnknownTarget."
 	^ nodeList 
 ]
 
@@ -80,6 +79,12 @@ StNewSettingsTree >> nodeList: aCollection [
 	nodeList := aCollection
 ]
 
+{ #category : 'accessing' }
+StNewSettingsTree >> persistence [
+
+	^ manager
+]
+
 { #category : 'private - queries' }
 StNewSettingsTree >> processSearch: aString [
 	"Recursively collect the nodes matching aString in the receiver"
@@ -92,14 +97,14 @@ StNewSettingsTree >> processSearch: aString [
 { #category : 'accessing' }
 StNewSettingsTree >> settingsFileDirectory [
 
-	^ self persistence fileReference parent
+	^ manager settingsFile parent
 ]
 
 { #category : 'testing' }
 StNewSettingsTree >> settingsFileReference [
 	"Answer a <String> with the name of the file where settings are stored"
 
-	^ self persistence fileReference 
+	^ manager settingsFile 
 ]
 
 { #category : 'instance creation' }
@@ -110,12 +115,12 @@ StNewSettingsTree >> settingsKeywords [
 
 { #category : 'accessing' }
 StNewSettingsTree >> sortBlock [
-	^ [:a :b | self itemSortBlock value: a declaration value: b declaration ]
+	^ [:a :b | self itemSortBlock value: a setting value: b setting ]
 ]
 
 { #category : 'instance creation' }
 StNewSettingsTree >> treeRoots [
-	"Answer a <Collection> of <StSettingNodePresenter> representing the main setting categories in the system"
+	"Answer an array of <StSettingNode> representing the main setting categories in the system"
 
-	^ self nodeList reject: #hasParent
+	^ (self nodeList reject: #hasParent) asArray sort: self sortBlock
 ]

@@ -15,7 +15,6 @@ Class {
 		'toolbarPresenter',
 		'detailsPresenter',
 		'buttonBarPresenter',
-		'exporter',
 		'categoriesPresenter',
 		'searchResult'
 	],
@@ -86,26 +85,6 @@ StSettingsBrowser >> defaultLayout [
 		yourself
 ]
 
-{ #category : 'initialization' }
-StSettingsBrowser >> exportSettings [
-	| nodes actions |
-
-	nodes := self settingsTree nodeList.
-	actions := nodes 
-		collect: [ : e | e item exportSettingAction ]
-		thenReject: [ : e | e isNil ].
-		
-	self exporter exportAllSettings: actions.
-	self inform: 'Settings were exported to ' , self exporter exportedFileFullName.
-	buttonBarPresenter enable
-]
-
-{ #category : 'accessing' }
-StSettingsBrowser >> exporter [
-
-	^ exporter
-]
-
 { #category : 'searching' }
 StSettingsBrowser >> followPath: aStSettingNode in: aCollection [
 
@@ -113,13 +92,6 @@ StSettingsBrowser >> followPath: aStSettingNode in: aCollection [
 		ifTrue: [ (self followPath: aStSettingNode parentNode in: aCollection) ]
 		ifFalse: [ aCollection add: aStSettingNode ].
 
-]
-
-{ #category : 'initialization' }
-StSettingsBrowser >> initialize [
-
-	super initialize.
-	exporter := StSettingsExporter new
 ]
 
 { #category : 'initialization' }
@@ -139,7 +111,7 @@ StSettingsBrowser >> initializeButtonBar [
 			icon: (self application iconNamed: #save);
 			label: 'Export';
 			help: 'Save settings into a file';
-			action: [ self exportSettings ];
+			action: [ self storeSettings ];
 			yourself);
 		yourself
 ]
@@ -189,8 +161,8 @@ StSettingsBrowser >> loadSettings [
 { #category : 'loading' }
 StSettingsBrowser >> loadSettingsFrom: aFileReference [ 
 
-	self settingsTree persistence fileReference: aFileReference.
-	self settingsTree updateSettingNodes.
+	self settingsTree persistence settingsFile: aFileReference.
+	self settingsTree persistence loadSettings.
 	self inform: 'Settings were loaded from ' , aFileReference fullName
 ]
 
@@ -245,6 +217,14 @@ StSettingsBrowser >> selectDialog: fileReferences [
 StSettingsBrowser >> sortNodes: aCollection [ 
 
 	^ aCollection sorted: #order ascending, #label ascending
+]
+
+{ #category : 'storing' }
+StSettingsBrowser >> storeSettings [
+
+	self settingsTree persistence storeSettings.
+	self inform: 'Settings were exported to ' , self settingsTree settingsFileReference fullName.
+	buttonBarPresenter enable
 ]
 
 { #category : 'initialization' }
